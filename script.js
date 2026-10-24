@@ -2,18 +2,33 @@ const TOTAL_AYAHS = 6236;
 const STORAGE_KEY = "ayahTab.currentAyah";
 let audio = null;
 
+const hasChromeStorage =
+  typeof chrome !== "undefined" && chrome.storage && chrome.storage.local;
+
 async function getStoredAyahIndex() {
-  return new Promise((resolve) => {
-    chrome.storage.local.get([STORAGE_KEY], (result) => {
-      resolve(result[STORAGE_KEY] || 1);
+  if (hasChromeStorage) {
+    return new Promise((resolve) => {
+      chrome.storage.local.get([STORAGE_KEY], (result) => {
+        resolve(result[STORAGE_KEY] || 1);
+      });
     });
-  });
+  }
+  try {
+    return parseInt(localStorage.getItem(STORAGE_KEY), 10) || 1;
+  } catch (e) {
+    return 1;
+  }
 }
 
 async function setStoredAyahIndex(index) {
-  return new Promise((resolve) => {
-    chrome.storage.local.set({ [STORAGE_KEY]: index }, () => resolve());
-  });
+  if (hasChromeStorage) {
+    return new Promise((resolve) => {
+      chrome.storage.local.set({ [STORAGE_KEY]: index }, () => resolve());
+    });
+  }
+  try {
+    localStorage.setItem(STORAGE_KEY, String(index));
+  } catch (e) {}
 }
 
 function randomAyah() {
